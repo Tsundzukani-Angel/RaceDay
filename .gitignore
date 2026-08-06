@@ -1,0 +1,11 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+
+# SQL Server backups
+*.bak
+
+# User-specific files
+*.user
+*.suo
