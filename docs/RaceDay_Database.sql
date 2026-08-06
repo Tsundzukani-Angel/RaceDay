@@ -102,3 +102,20 @@ create table Enrolment
        check (PaymentStatus in ('Pending','Paid'))
 );
 go
+
+--Result Table--
+create table Result
+(
+  ResultID int identity(1,1) primary key,
+  EnrolmentID int not null,
+  FinishTime time,
+  Position int,
+  Status varchar(20),
+  constraint fk_Result_Enrolment
+      foreign key (EnrolmentID)
+      references Enrolment(EnrolmentID),
+
+   constraint chk_ResultStatus
+       check (Status in ('Completed','DNF','Disqualified'))
+);
+go
