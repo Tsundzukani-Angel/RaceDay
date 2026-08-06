@@ -79,3 +79,26 @@ create table Category
      references Event(EventID)
 );
 go
+
+--Enrolment table--
+create table Enrolment
+(
+  EnrolmentID int identity(1,1) primary key,
+  ParticipantID int not null,
+  EventID int not null,
+  CategoryID int not null,
+  RegistrationDate datetime not null default getdate(),
+  RaceNumber int not null,
+  PaymentStatus varchar(20) not null default 'Pending',
+  constraint fk_Enrolment_User
+     foreign key (ParticipantID)
+     references [User](UserID),
+
+  constraint fk_Enrolment_Category
+      foreign key (CategoryID)
+      references Category(CategoryID),
+
+   constraint chk_PaymentStatus
+       check (PaymentStatus in ('Pending','Paid'))
+);
+go
