@@ -1,3 +1,12 @@
+if DB_ID('RaceDayDB') is not null
+begin 
+   drop database RaceDayDB;
+end
+go
+
+create database RaceDayDB;
+go
+
 use RaceDayDB;
 go
 -- Role table--
@@ -119,3 +128,9 @@ create table Result
        check (Status in ('Completed','DNF','Disqualified'))
 );
 go
+
+--inserting roles into role table--
+insert into Role(RoleName)
+values('Organiser'), ('Participant');
+go
+select * from Role;
