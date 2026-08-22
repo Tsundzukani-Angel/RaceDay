@@ -134,3 +134,17 @@ insert into Role(RoleName)
 values('Organiser'), ('Participant');
 go
 select * from Role;
+
+insert into [User]
+(RoleID, FirstName, LastName, Email, PasswordHash, PhoneNumber)
+values
+(1, 'Sarah', 'Mokeana',
+ 'sarah@raceday.co.za', 'Password123', '0829653012'),
+(1, 'David', 'Naidoo',
+ 'david@raceday.co.za', 'Password123', '0836124569'),
+(2, 'Lerato', 'Dlamini',
+ 'lerato@gmail.com', 'Password123', '0739154020'),
+(2, 'Sipho', 'Nkosi',
+ 'sipho@gmail.com', 'Password123', '0631057820');
+ go
+ select * from [User];
