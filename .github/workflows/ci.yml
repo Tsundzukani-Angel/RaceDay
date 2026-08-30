@@ -19,7 +19,7 @@ jobs:
       - name: Check required project files
         run:  | 
           test -f docs/RaceDayERD.drawio (1).png
-          test -f docs/RceDay_Database.sql
+          test -f docs/RaceDay_Database.sql
           test -f docs/API_Endpoint_Plan.md
           test -f README.md
       
@@ -30,4 +30,3 @@ jobs:
       
       - name: Validation successful
         run: echo "RaceDay Part 1 repository structure is valid."
-        
