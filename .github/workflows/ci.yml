@@ -18,7 +18,7 @@ jobs:
       
       - name: Check required project files
         run:  | 
-          test -f docs/RaceDayERD.drawio (1).png
+          test -f docs/RaceDayERD.drawio_1.png
           test -f docs/RaceDay_Database.sql
           test -f docs/API_Endpoint_Plan.md
           test -f README.md
