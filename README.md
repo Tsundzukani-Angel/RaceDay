@@ -68,6 +68,7 @@ GitHub Actions is used to validate the RaceDay repository structure. The workflo
 6. The script creates all required tables and constraints.
 7. The script inserts sample data for testing.
 
+YouTube Link: https://youtu.be/KajMtqlY5C4
 ## Part 2
 
 
