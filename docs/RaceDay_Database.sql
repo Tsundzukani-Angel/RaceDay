@@ -1,8 +1,10 @@
 
+
 if DB_ID('RaceDayDB') is not null
 begin 
    drop database RaceDayDB;
 end
+
 go
 
 create database RaceDayDB;
@@ -168,7 +170,6 @@ go
 insert into Role(RoleName)
 values('Organiser'), ('Participant');
 go
-select * from Role;
 
 --populating user table--
 insert into [User]
@@ -183,9 +184,8 @@ values
 (2, 'Sipho', 'Nkosi',
  'sipho@gmail.com', 'Password123', '0631057820');
 go
-select * from [User];
 
- --populating profile table--
+--populating profile table--
 insert into Profile(UserID, DateOfBirth, Gender, EmergencyContact, MedicalNotes)
 values
 (1, '1985-03-10', 'Female',
@@ -197,7 +197,6 @@ values
 (4, '1999-09-01', 'Male', 
  '0713332222', 'None');
 go
-select * from Profile;
 
 --populating the event table--
 insert into Event(
@@ -215,7 +214,6 @@ values(
  (1, 'Soweto Charity Walk', 'Community fundraising walk',
  '2027-09-04', 'Soweto', 10.00, 'Walk', 5000, '2027-08-20', 'Open');
  go
- select * from Event;
  
 --populating the category table--
 insert into Category(
@@ -223,13 +221,12 @@ insert into Category(
   CategoryName,
   CategoryType, 
   EntryFee)
-values(2, 'Senior', 'Age', 450),
- (2, 'Veteran', 'Age', 450),
- (3, '109 km', 'Distance', 650),
- (4, '10 km', 'Distance', 150);
+values(1, 'Senior', 'Age', 450),
+ (1, 'Veteran', 'Age', 450),
+ (2, '109 km', 'Distance', 650),
+ (3, '10 km', 'Distance', 150);
  go
- select * from Category;
-
+ 
  --Populating Enrolment--
 insert into Enrolment
 ( ParticipantID,
@@ -239,27 +236,21 @@ insert into Enrolment
   PaymentStatus
 )
 values 
- (3, 2, 3, 1001, 'Paid'),
- (4, 3, 5, 2050, 'Paid'),
- (3, 4, 6, 3010, 'Pending');
-go
-select * from Enrolment;
+ (3, 1, 
+   (select CategoryID from Category
+    where EventID = 1 and CategoryName = 'Senior'),
+ 1001, 'Paid'),
 
---verifying the relationships--
-select 
-en.EnrolmentID,
-u.FirstName + ' ' + u.LastName as Participant,
-e.Name as Event,
-c.CategoryName as Category,
-en.Racenumber,
-en.PaymentStatus
-from Enrolment en
-inner join [User] u
- on en.ParticipantID = u.UserID
-inner join Event e
- on en.EventID = e.EventID
-inner join Category c
- on en.CategoryID = c.CategoryID;
+ (4, 2, 
+  (select CategoryID from Category
+   where EventID = 2 and CategoryName = '109 km'),
+ 2050, 'Paid'),
+
+ (3, 3, 
+  (select CategoryID from Category 
+   where EventID = 3 and CategoryName = '10 km'),
+   3010, 'Pending');
+go
 
 insert into Result
  ( EnrolmentID, 
@@ -268,43 +259,20 @@ insert into Result
    Status
  )
 values 
- ( 3, '06:45:18', 120, 'Completed'),
- (4, '03:22:40', 58, 'Completed');
+ ( 
+   (
+     select EnrolmentID from Enrolment 
+     where ParticipantID = 3 and EventID = 1
+   ), 
+  '06:45:18', 120, 'Completed'),
+
+ (
+   (
+     select EnrolmentID from Enrolment
+     where ParticipantiD = 4 and EventID = 2
+   ), 
+  '03:22:40', 58, 'Completed');
 go
-select * from Result;
-
-select
- r.ResultID,
- u.FirstName + ' ' + u.LastName as Participant,
- e.Name as Event,
- c.CategoryName as Category,
- r.FinishTime,
- r.Position,
- r.Status
-from Result r
-inner join Enrolment en
- on r.EnrolmentID = en.EnrolmentID
-inner join [User] u
- on en.ParticipantID = u.UserID
-inner join Event e
- on en.EventID = e.EventID
-inner join Category c
- on en.CategoryID = c.CategoryID
-order by r.Position;
-
-select 'Role' as TableName, count(*) as RecordCount from Role
-union all
-select 'User', count(*) from [User]
-union all
-select 'Profile', count(*) from Profile
-union all
-select 'Event', count(*) from Event
-union all
-select 'Category', count(*) from Category
-union all
-select 'Enrolment', count(*) from Enrolment
-union all
-select 'Result', count(*) from Result;
 
 select * from Role;
 select * from [User];
