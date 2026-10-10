@@ -1,6 +1,6 @@
 ﻿namespace RaceDay.API.Services;
 
-public static class SessionExtensions
+public static class RaceDaySession
 {
     public const string UserIdKey = "UserId";
     public const string RoleKey = "Role";

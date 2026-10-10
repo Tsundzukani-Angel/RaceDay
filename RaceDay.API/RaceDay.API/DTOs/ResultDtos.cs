@@ -13,5 +13,5 @@ public class ResultDto
     [Required, Range(1, 100000)]
     public int Position { get; set; }
 
-    public string Status { get; set; } = "Finished"; // "Finished" | "DNF" | "DNS" | "Disqualified"
+    public string Status { get; set; } = "Finished"; // "Finished", "DNF", "DNS" & "Disqualified"
 }
