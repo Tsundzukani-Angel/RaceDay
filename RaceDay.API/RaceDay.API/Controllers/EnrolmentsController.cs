@@ -23,7 +23,7 @@ public class EnrolmentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Enrol(EnrolmentDto dto)
     {
-        if (!HttpContext.Session.IsParticipant()) return Forbid();
+        if (!HttpContext.Session.IsParticipant()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var cat = await _db.Categories.FindAsync(dto.CategoryID);
@@ -52,7 +52,7 @@ public class EnrolmentsController : ControllerBase
     [HttpGet("my")]
     public async Task<IActionResult> MyEnrolments()
     {
-        if (!HttpContext.Session.IsParticipant()) return Forbid();
+        if (!HttpContext.Session.IsParticipant()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var list = await _db.Enrolments
@@ -96,12 +96,12 @@ public class EnrolmentsController : ControllerBase
     [HttpGet("event/{eventId}")]
     public async Task<IActionResult> ByEvent(int eventId)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var ev = await _db.Events.FindAsync(eventId);
         if (ev == null) return NotFound();
-        if (ev.OrganiserID != userId) return Forbid();
+        if (ev.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         var list = await _db.Enrolments
             .Where(e => e.EventID == eventId)
@@ -131,14 +131,14 @@ public class EnrolmentsController : ControllerBase
     [HttpPut("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, UpdateEnrolmentStatusDto dto)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var enrolment = await _db.Enrolments
             .Include(e => e.Event)
             .FirstOrDefaultAsync(e => e.EnrolmentID == id);
         if (enrolment == null) return NotFound();
-        if (enrolment.Event.OrganiserID != userId) return Forbid();
+        if (enrolment.Event.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         enrolment.PaymentStatus = dto.PaymentStatus;
         if (dto.RaceNumber != null) enrolment.RaceNumber = dto.RaceNumber;

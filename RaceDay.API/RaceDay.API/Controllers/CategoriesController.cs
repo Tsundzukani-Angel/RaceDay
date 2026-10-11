@@ -26,12 +26,12 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CategoryDto dto)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var ev = await _db.Events.FindAsync(dto.EventID);
         if (ev == null) return NotFound(new { message = "Event not found." });
-        if (ev.OrganiserID != userId) return Forbid();
+        if (ev.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         var cat = new Category
         {
@@ -52,7 +52,7 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var cat = await _db.Categories
@@ -60,7 +60,7 @@ public class CategoriesController : ControllerBase
             .FirstOrDefaultAsync(c => c.CategoryID == id);
 
         if (cat == null) return NotFound();
-        if (cat.Event.OrganiserID != userId) return Forbid();
+        if (cat.Event.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         _db.Categories.Remove(cat);
         await _db.SaveChangesAsync();

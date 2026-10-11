@@ -22,7 +22,7 @@ public class ResultsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Capture(ResultDto dto)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var enrolment = await _db.Enrolments
@@ -30,7 +30,7 @@ public class ResultsController : ControllerBase
             .FirstOrDefaultAsync(e => e.EnrolmentID == dto.EnrolmentID);
 
         if (enrolment == null) return NotFound(new { message = "Enrolment not found." });
-        if (enrolment.Event.OrganiserID != userId) return Forbid();
+        if (enrolment.Event.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         if (await _db.Results.AnyAsync(r => r.EnrolmentID == dto.EnrolmentID))
             return Conflict(new { message = "Result already captured for this enrolment." });
@@ -51,7 +51,7 @@ public class ResultsController : ControllerBase
     [HttpGet("my")]
     public async Task<IActionResult> MyResults()
     {
-        if (!HttpContext.Session.IsParticipant()) return Forbid();
+        if (!HttpContext.Session.IsParticipant()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var results = await _db.Results

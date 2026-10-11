@@ -60,7 +60,7 @@ public class EventsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(EventDto dto)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var organiserId = HttpContext.Session.GetUserId()!.Value;
 
         var ev = new Event
@@ -85,12 +85,12 @@ public class EventsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, EventDto dto)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var ev = await _db.Events.FindAsync(id);
         if (ev == null) return NotFound();
-        if (ev.OrganiserID != userId) return Forbid();
+        if (ev.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         ev.Name = dto.Name;
         ev.Description = dto.Description;
@@ -110,12 +110,12 @@ public class EventsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var ev = await _db.Events.FindAsync(id);
         if (ev == null) return NotFound();
-        if (ev.OrganiserID != userId) return Forbid();
+        if (ev.OrganiserID != userId) return StatusCode(403, new { message = "Forbidden: insufficient role." });
 
         _db.Events.Remove(ev);
         await _db.SaveChangesAsync();
@@ -126,7 +126,7 @@ public class EventsController : ControllerBase
     [HttpGet("my-events")]
     public async Task<IActionResult> MyEvents()
     {
-        if (!HttpContext.Session.IsOrganiser()) return Forbid();
+        if (!HttpContext.Session.IsOrganiser()) return StatusCode(403, new { message = "Forbidden: insufficient role." });
         var userId = HttpContext.Session.GetUserId()!.Value;
 
         var events = await _db.Events
