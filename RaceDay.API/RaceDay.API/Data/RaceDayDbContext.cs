@@ -26,6 +26,11 @@ public class RaceDayDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        // Decimal precision for EntryFee
+        modelBuilder.Entity<Category>()
+            .Property(c => c.EntryFee)
+            .HasPrecision(10, 2); // up to 99,999,999.99 with 2 decimal places
+
         // Role 1-to-many User
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
