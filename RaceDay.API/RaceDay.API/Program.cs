@@ -5,9 +5,12 @@ using RaceDay.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Database 
-builder.Services.AddDbContext<RaceDayDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("RaceDayConnection")));
-
+// In test environment, the factory injects its own InMemory provider.
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<RaceDayDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("RaceDayConnection")));
+}
 // Controllers, JSON cycle handling & Swagger
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
