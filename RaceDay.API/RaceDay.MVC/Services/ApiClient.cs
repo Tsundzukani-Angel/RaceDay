@@ -1,5 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using RaceDay.MVC.Models;
 
 namespace RaceDay.MVC.Services;
 
@@ -7,6 +10,7 @@ public class ApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     public ApiClient(HttpClient httpClient, IConfiguration config, IHttpContextAccessor httpContextAccessor)
     {
@@ -15,9 +19,10 @@ public class ApiClient
 
         var baseUrl = config["ApiSettings:BaseUrl"];
         _httpClient.BaseAddress = new Uri(baseUrl!);
+
+        _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
-    // Helper method to grab the session cookie from the browser and send it to the API
     private void AttachSessionCookie()
     {
         var sessionCookie = _httpContextAccessor.HttpContext?.Request.Cookies[".AspNetCore.Session"];
@@ -28,7 +33,6 @@ public class ApiClient
         }
     }
 
-    // GET request
     public async Task<T?> GetAsync<T>(string endpoint)
     {
         AttachSessionCookie();
@@ -36,12 +40,11 @@ public class ApiClient
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonSerializer.Deserialize<T>(json, _jsonOptions);
         }
         return default;
     }
 
-    // POST request
     public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data)
     {
         AttachSessionCookie();
@@ -49,7 +52,7 @@ public class ApiClient
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(endpoint, content);
 
-        // Capture the API's session cookie and pass it to the browser
+        // Capture session cookie from API and pass it to the browser
         if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
         {
             foreach (var cookie in cookies)
@@ -57,26 +60,27 @@ public class ApiClient
                 if (cookie.StartsWith(".AspNetCore.Session="))
                 {
                     var cookieValue = cookie.Split(';')[0].Replace(".AspNetCore.Session=", "");
-                    _httpContextAccessor.HttpContext?.Response.Cookies.Append(".AspNetCore.Session", cookieValue);
+                    _httpContextAccessor.HttpContext?.Response.Cookies.Append(".AspNetCore.Session", cookieValue, new CookieOptions { HttpOnly = true });
                 }
             }
         }
         return response;
     }
 
-    // PUT request
-    public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
+    // Helper methods for authentication
+    public async Task<UserResponse?> LoginAsync(LoginModel model)
     {
-        AttachSessionCookie();
-        var json = JsonSerializer.Serialize(data);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        return await _httpClient.PutAsync(endpoint, content);
+        var response = await PostAsync("/auth/login", model);
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<UserResponse>(json, _jsonOptions);
+        }
+        return null;
     }
 
-    // DELETE request
-    public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
+    public async Task<UserResponse?> GetCurrentUserAsync()
     {
-        AttachSessionCookie();
-        return await _httpClient.DeleteAsync(endpoint);
+        return await GetAsync<UserResponse>("/auth/me");
     }
 }
