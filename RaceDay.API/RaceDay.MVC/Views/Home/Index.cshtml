@@ -1,8 +1,58 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<RaceDay.MVC.Models.EventDto>
+@{
+    ViewData["Title"] = "Upcoming Events";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary">RaceDay Events</h1>
+            <p class="lead">Find your next marathon, cycle tour, or park run.</p>
+            <hr class="w-50 mx-auto" />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            No events have been created yet.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var ev in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        @if (!string.IsNullOrEmpty(ev.BannerUrl))
+                        {
+                            <img src="@ev.BannerUrl" class="card-img-top" alt="@ev.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span>No Image</span>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-success">@ev.EventType</span>
+                                <small class="text-muted">@ev.EventDate.ToString("dd MMM yyyy")</small>
+                            </div>
+                            <h5 class="card-title fw-bold">@ev.Name</h5>
+                            <p class="card-text text-muted small">@ev.Location</p>
+                            <p class="card-text">@(ev.Description.Length > 80 ? ev.Description.Substring(0, 80) + "..." : ev.Description)</p>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center pb-3">
+                            <span class="fw-bold text-success">R @(ev.Categories.Any() ? ev.Categories.Min(c => c.EntryFee).ToString("0.00") : "0.00")</span>
+                            <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>

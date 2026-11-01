@@ -20,6 +20,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
@@ -36,7 +37,15 @@
                         }
                         else
                         {
-                            <li class="nav-item">
+                            @if (Context.Session.GetString("Role") == "Organiser")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-bold" asp-controller="Organiser" asp-action="Dashboard">Dashboard</a>
+                                </li>
+                            }
+
+                            <li class="nav-item ms-auto">
+                                <!-- ms-auto pushes it to the right -->
                                 <span class="nav-link text-dark fw-bold">Hi, @Context.Session.GetString("FullName")!</span>
                             </li>
                             <li class="nav-item">
