@@ -52,7 +52,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var response = await _api.PostAsync("/auth/register", model);
+        var response = await _api.PostAsync("api/auth/register", model);
 
         if (response.IsSuccessStatusCode)
         {
@@ -60,7 +60,19 @@ public class AccountController : Controller
             return RedirectToAction(nameof(Login));
         }
 
-        ModelState.AddModelError("", "Registration failed. Email might already exist.");
+        // Extract the exact error from the API
+        var errorJson = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(errorJson))
+        {
+            ModelState.AddModelError("", $"API Error: {response.StatusCode}");
+        }
+        else
+        {
+            // Show the raw error for anything else (400, 500, etc)
+            ModelState.AddModelError("", $"API Error ({response.StatusCode}): {errorJson}");
+        }
+
         return View(model);
     }
 
