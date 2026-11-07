@@ -84,4 +84,13 @@ public class HomeController : Controller
         return View(enrolments);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> MyResults()
+    {
+        if (HttpContext.Session.GetString("Role") != "Participant")
+            return RedirectToAction("Index", "Home");
+
+        var results = await _api.GetAsync<List<ResultDto>>("api/results/my") ?? new List<ResultDto>();
+        return View(results);
+    }
 }

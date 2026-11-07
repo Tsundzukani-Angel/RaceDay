@@ -49,3 +49,32 @@ public class EnrolmentCategoryDto
     public string CategoryName { get; set; } = string.Empty;
     public decimal EntryFee { get; set; }
 }
+
+public class OrganiserEnrolmentDto
+{
+    public int EnrolmentID { get; set; }
+    public string PaymentStatus { get; set; } = string.Empty;
+    public DateTime RegistrationDate { get; set; }
+    public string? RaceNumber { get; set; }
+    public OrganiserParticipantDto Participant { get; set; } = null!;
+    public string Category { get; set; } = string.Empty;
+}
+
+public class OrganiserParticipantDto
+{
+    public int UserID { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ResultDto
+{
+    public int ResultID { get; set; }
+    public string EventName { get; set; } = string.Empty;
+    public DateTime EventDate { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public TimeSpan FinishTime { get; set; }
+    public int Position { get; set; }
+    public string Status { get; set; } = string.Empty;
+}

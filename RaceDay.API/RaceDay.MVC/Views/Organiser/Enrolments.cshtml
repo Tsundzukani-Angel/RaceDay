@@ -1,0 +1,81 @@
+﻿@model IEnumerable<RaceDay.MVC.Models.OrganiserEnrolmentDto>
+@{
+    ViewData["Title"] = $"Enrolments for {ViewBag.EventName}";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Enrolments</h2>
+            <p class="text-muted mb-0">Participants for <strong>@ViewBag.EventName</strong></p>
+        </div>
+        <a asp-action="Dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No participants have enrolled yet.</div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Participant</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Race No.</th>
+                            <th>Capture Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var enr in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@enr.Participant.FirstName @enr.Participant.LastName</div>
+                                    <div class="text-muted small">@enr.Participant.Email</div>
+                                </td>
+                                <td>@enr.Category</td>
+                                <td>
+                                    @if (enr.PaymentStatus == "Confirmed")
+                                    {
+                                        <span class="badge bg-success">Confirmed</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrEmpty(enr.RaceNumber) ? "-" : enr.RaceNumber)</td>
+                                <td>
+                                    <form asp-action="CaptureResult" method="post" class="d-flex gap-2 align-items-center">
+                                        <input type="hidden" name="enrolmentId" value="@enr.EnrolmentID" />
+                                        <input type="hidden" name="eventId" value="@ViewBag.EventId" />
+
+                                        <input type="text" name="finishTime" class="form-control form-control-sm" placeholder="HH:MM:SS" style="width: 100px;" required />
+                                        <input type="number" name="position" class="form-control form-control-sm" placeholder="Pos" style="width: 70px;" required />
+
+                                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

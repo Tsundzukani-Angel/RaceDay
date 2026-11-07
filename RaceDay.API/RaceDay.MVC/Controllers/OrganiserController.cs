@@ -110,4 +110,50 @@ public class OrganiserController : Controller
         // If we get here, it failed. Redirect back to the page.
         return RedirectToAction(nameof(Categories), new { eventId = model.EventID });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Enrolments(int eventId)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        var ev = await _api.GetAsync<EventDto>($"api/events/{eventId}");
+        if (ev == null) return NotFound();
+
+        var enrolments = await _api.GetAsync<List<OrganiserEnrolmentDto>>($"api/enrolments/event/{eventId}") ?? new List<OrganiserEnrolmentDto>();
+
+        ViewBag.EventName = ev.Name;
+        ViewBag.EventId = ev.EventID;
+
+        return View(enrolments);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CaptureResult(int enrolmentId, string finishTime, int position, int eventId)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        var resultDto = new
+        {
+            EnrolmentID = enrolmentId,
+            FinishTime = TimeSpan.Parse(finishTime),
+            Position = position,
+            Status = "Finished"
+        };
+
+        var response = await _api.PostAsync("api/results", resultDto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            TempData["ErrorMessage"] = $"Failed to capture result: {error}";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = "Result captured successfully!";
+        }
+
+        return RedirectToAction(nameof(Enrolments), new { eventId = eventId });
+    }
 }
