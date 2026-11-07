@@ -64,4 +64,50 @@ public class OrganiserController : Controller
        
         return View(model);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Categories(int eventId)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        var ev = await _api.GetAsync<EventDto>($"api/events/{eventId}");
+        if (ev == null) return NotFound();
+
+        var categories = await _api.GetAsync<List<CategoryDto>>($"api/categories/event/{eventId}") ?? new List<CategoryDto>();
+
+        ViewBag.EventName = ev.Name;
+        ViewBag.EventId = ev.EventID;
+
+        return View(categories);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddCategory(CategoryViewModel model)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        if (ModelState.IsValid)
+        {
+            var response = await _api.PostAsync("api/categories", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // If it worked, redirect back to the categories list
+                return RedirectToAction(nameof(Categories), new { eventId = model.EventID });
+            }
+
+            // IF IT FAILED: Read the API's error and pass it to the view
+            var errorJson = await response.Content.ReadAsStringAsync();
+            TempData["ErrorMessage"] = $"API Error: {errorJson}";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Invalid form data.";
+        }
+
+        // If we get here, it failed. Redirect back to the page.
+        return RedirectToAction(nameof(Categories), new { eventId = model.EventID });
+    }
 }
