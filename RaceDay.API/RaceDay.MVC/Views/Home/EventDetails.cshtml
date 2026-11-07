@@ -1,0 +1,61 @@
+﻿@model RaceDay.MVC.Models.EventDetailsViewModel
+@{
+    ViewData["Title"] = Model.Event.Name;
+}
+
+<div class="container mt-4">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="badge bg-success mb-2">@Model.Event.EventType</span>
+                    <h1 class="fw-bold">@Model.Event.Name</h1>
+                    <p class="text-muted fs-5"><i class="bi bi-geo-alt-fill"></i> @Model.Event.Location | <i class="bi bi-calendar-event"></i> @Model.Event.EventDate.ToString("dd MMM yyyy")</p>
+                </div>
+                <div class="text-end">
+                    <h3 class="text-primary fw-bold">@Model.Event.Distance km</h3>
+                </div>
+            </div>
+            <hr />
+            <p>@Model.Event.Description</p>
+        </div>
+    </div>
+
+    <h3 class="mb-3 fw-bold">Available Categories</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        @foreach (var cat in Model.Event.Categories)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold">@cat.CategoryName</h5>
+                        <p class="text-muted small mb-2">@cat.CategoryType Category</p>
+                        <h4 class="text-success mb-3">R @cat.EntryFee.ToString("0.00")</h4>
+
+                        @if (Model.AlreadyEnrolled)
+                        {
+                            <button class="btn btn-secondary w-100" disabled>Already Enrolled</button>
+                        }
+                        else if (Model.IsParticipant)
+                        {
+                            <form asp-action="Enrol" method="post">
+                                <input type="hidden" name="eventId" value="@Model.Event.EventID" />
+                                <input type="hidden" name="categoryId" value="@cat.CategoryID" />
+                                <button type="submit" class="btn btn-primary w-100">Enter Event</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-action="Login" asp-controller="Account" class="btn btn-outline-primary w-100">Log in to Enter</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

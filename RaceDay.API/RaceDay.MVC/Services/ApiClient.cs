@@ -23,13 +23,10 @@ public class ApiClient
         _httpClient.BaseAddress = new Uri(baseUrl);
 
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        _postOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        _postOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     }
 
-    // Helper to create a request message with the session cookie attached
+    // Attach cookie to the individual request, not the HttpClient
     private HttpRequestMessage CreateRequest(HttpMethod method, string endpoint, HttpContent? content = null)
     {
         var request = new HttpRequestMessage(method, endpoint.TrimStart('/'));
@@ -88,7 +85,6 @@ public class ApiClient
     {
         var json = JsonSerializer.Serialize(data, _postOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
         var request = CreateRequest(HttpMethod.Put, endpoint, content);
         return await _httpClient.SendAsync(request);
     }

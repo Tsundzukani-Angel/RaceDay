@@ -44,6 +44,13 @@
                                 </li>
                             }
 
+                            @if (Context.Session.GetString("Role") == "Participant")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-bold" asp-controller="Home" asp-action="MyEvents">My Events</a>
+                                </li>
+                            }
+
                             <li class="nav-item ms-auto">
                                 <!-- ms-auto pushes it to the right -->
                                 <span class="nav-link text-dark fw-bold">Hi, @Context.Session.GetString("FullName")!</span>
