@@ -19,31 +19,40 @@ public class ApiClient
         _httpContextAccessor = httpContextAccessor;
 
         var baseUrl = config["ApiSettings:BaseUrl"] ?? "https://localhost:7112/";
-
-        // Ensures it ends with a slash
         if (!baseUrl.EndsWith("/")) baseUrl += "/";
-
         _httpClient.BaseAddress = new Uri(baseUrl);
 
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        _postOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        _postOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
     }
 
-    private void AttachSessionCookie()
+    // Helper to create a request message with the session cookie attached
+    private HttpRequestMessage CreateRequest(HttpMethod method, string endpoint, HttpContent? content = null)
     {
+        var request = new HttpRequestMessage(method, endpoint.TrimStart('/'));
+
         var sessionCookie = _httpContextAccessor.HttpContext?.Request.Cookies[".AspNetCore.Session"];
         if (!string.IsNullOrEmpty(sessionCookie))
         {
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Cookie", $".AspNetCore.Session={sessionCookie}");
+            request.Headers.Add("Cookie", $".AspNetCore.Session={sessionCookie}");
         }
+
+        if (content != null)
+        {
+            request.Content = content;
+        }
+
+        return request;
     }
 
     public async Task<T?> GetAsync<T>(string endpoint)
     {
-        AttachSessionCookie();
-        // Removes leading slash so it appends to BaseAddress correctly
-        var response = await _httpClient.GetAsync(endpoint.TrimStart('/'));
+        var request = CreateRequest(HttpMethod.Get, endpoint);
+        var response = await _httpClient.SendAsync(request);
+
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
@@ -54,14 +63,13 @@ public class ApiClient
 
     public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data)
     {
-        AttachSessionCookie();
-
         var json = JsonSerializer.Serialize(data, _postOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // Remove leading slash so it appends to BaseAddress correctly
-        var response = await _httpClient.PostAsync(endpoint.TrimStart('/'), content);
+        var request = CreateRequest(HttpMethod.Post, endpoint, content);
+        var response = await _httpClient.SendAsync(request);
 
+        // Capture the new session cookie from the API (on login)
         if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
         {
             foreach (var cookie in cookies)
@@ -78,23 +86,22 @@ public class ApiClient
 
     public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data)
     {
-        AttachSessionCookie();
         var json = JsonSerializer.Serialize(data, _postOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        return await _httpClient.PutAsync(endpoint.TrimStart('/'), content);
+
+        var request = CreateRequest(HttpMethod.Put, endpoint, content);
+        return await _httpClient.SendAsync(request);
     }
 
     public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
     {
-        AttachSessionCookie();
-        return await _httpClient.DeleteAsync(endpoint.TrimStart('/'));
+        var request = CreateRequest(HttpMethod.Delete, endpoint);
+        return await _httpClient.SendAsync(request);
     }
 
     // --- Auth Helpers ---
-
     public async Task<UserResponse?> LoginAsync(LoginModel model)
     {
-        // Notice there is no leading slash here
         var response = await PostAsync("api/auth/login", model);
         if (response.IsSuccessStatusCode)
         {
