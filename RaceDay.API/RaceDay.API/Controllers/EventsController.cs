@@ -12,7 +12,14 @@ namespace RaceDay.API.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly RaceDayDbContext _db;
-    public EventsController(RaceDayDbContext db) => _db = db;
+    private readonly BlobService _blobService;
+
+    public EventsController(RaceDayDbContext db, BlobService blobService)
+    {
+        _db = db;
+        _blobService = blobService;
+    }
+    
 
     /// <summary>Public: list all events with categories.</summary>
     [HttpGet]
@@ -146,5 +153,19 @@ public class EventsController : ControllerBase
             })
             .ToListAsync();
         return Ok(events);
+    }
+
+    /// <summary>Organiser only: upload an event banner image.</summary>
+    [HttpPost("upload-banner")]
+    public async Task<IActionResult> UploadBanner(IFormFile file)
+    {
+        if (!HttpContext.Session.IsOrganiser())
+            return StatusCode(403, new { message = "Forbidden: insufficient role." });
+
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+
+        var url = await _blobService.UploadFileAsync(file);
+        return Ok(new { bannerUrl = url });
     }
 }

@@ -83,4 +83,55 @@ public class AccountController : Controller
         HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        if (HttpContext.Session.GetString("UserId") == null)
+            return RedirectToAction("Login");
+
+        var user = await _api.GetAsync<UserResponse>("api/users/profile");
+        if (user == null) return NotFound();
+
+        // Get full profile details (the basic UserResponse doesn't include Profile)
+        var model = new ProfileViewModel
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Role = user.Role,
+            PhoneNumber = user.PhoneNumber
+            };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Profile(ProfileViewModel model)
+    {
+        if (HttpContext.Session.GetString("UserId") == null)
+            return RedirectToAction("Login");
+
+        var updateDto = new UpdateProfileDto
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            PhoneNumber = model.PhoneNumber
+        };
+
+        var response = await _api.PutAsync("api/users/profile", updateDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["SuccessMessage"] = "Profile updated successfully!";
+            // Update the navbar name
+            HttpContext.Session.SetString("FullName", $"{model.FirstName} {model.LastName}");
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Failed to update profile.";
+        }
+
+        return RedirectToAction(nameof(Profile));
+    }
 }

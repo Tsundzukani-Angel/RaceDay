@@ -111,4 +111,22 @@ public class ApiClient
     {
         return await GetAsync<UserResponse>("api/auth/me");
     }
+
+    public async Task<HttpResponseMessage> PostFileAsync(string endpoint, MultipartFormDataContent content)
+    {
+        // Create the request
+        var request = new HttpRequestMessage(HttpMethod.Post, endpoint.TrimStart('/'));
+
+        // Attach the session cookie manually
+        var sessionCookie = _httpContextAccessor.HttpContext?.Request.Cookies[".AspNetCore.Session"];
+        if (!string.IsNullOrEmpty(sessionCookie))
+        {
+            request.Headers.Add("Cookie", $".AspNetCore.Session={sessionCookie}");
+        }
+
+        // Assign the content. HttpClient will automatically add the correct Content-Type (with boundary).
+        request.Content = content;
+
+        return await _httpClient.SendAsync(request);
+    }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
 using RaceDay.API.Services;
@@ -32,6 +33,7 @@ builder.Services.AddSwaggerGen(c =>
 // Dependency Injection
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddScoped<RaceDay.API.Services.BlobService>();
 // Session 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -41,12 +43,18 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// CORS (for Part 3 MVC) 
 builder.Services.AddCors(o => o.AddPolicy("AllowMVC", p =>
     p.WithOrigins("https://localhost:7001", "http://localhost:5001")
      .AllowAnyHeader()
      .AllowAnyMethod()
      .AllowCredentials()));
+
+// Allow any hostname (this isfor Docker networking)
+builder.Services.AddHealthChecks(); // Just to ensure we have services
+builder.Services.Configure<HostFilteringOptions>(options =>
+{
+    options.AllowedHosts.Clear(); // Clear the default restrictions
+});
 
 var app = builder.Build();
 

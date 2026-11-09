@@ -1,22 +1,173 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+/* Custom RaceDay Theme */
+:root {
+    --primary-blue: #1e3c72;
+    --accent-yellow: #ffc107;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card hover effect */
+.card-hover {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+
+/* Make buttons slightly rounded */
+.btn {
+    border-radius: 8px;
+}
+
+/* Table hover styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    min-height: 60vh;
+    border-bottom: 5px solid #ffc107; /* Yellow accent line */
+}
+
+/* --- Typography tweaks --- */
+.tracking-wider {
+    letter-spacing: 1.5px;
+}
+
+/* --- Smooth Hover for Cards --- */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+    .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+
+/* --- Navbar Customization --- */
+.navbar {
+    border-bottom: 3px solid #ffc107;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+/* --- GLOBAL BRANDING --- */
+
+/* Page Titles */
+h1, h2, h3, h4, h5 {
+    font-weight: 700;
+    color: #1e3c72; /* Brand Navy */
+}
+
+/* Primary Buttons (Change from default Bootstrap Blue to Brand Navy) */
+.btn-primary {
+    background-color: #1e3c72;
+    border-color: #1e3c72;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+    .btn-primary:hover {
+        background-color: #152c56;
+        border-color: #152c56;
+    }
+
+/* Success/Add Buttons (Brand Yellow) */
+.btn-success {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+    .btn-success:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+        color: #000;
+    }
+
+/* Card Headers (Dark Navy) */
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-dark {
+    background-color: #1e3c72 !important;
+    border-bottom: 4px solid #ffc107; /* Yellow Accent Line */
+    color: white !important;
+}
+
+/* Tables */
+.table thead th {
+    background-color: #f8f9fa;
+    color: #1e3c72;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* --- GLOBAL BACKGROUND & TEXT --- */
+body {
+    background-color: #1a1e24 !important; /* Deep dim slate-gray */
+    color: #e0e0e0; /* Light text for readability */
+}
+
+/* Ensure the footer stays dark to match the theme */
+.footer {
+    background-color: #121519 !important;
+    color: #a0aab5 !important;
+    border-top: 1px solid #2c333b !important;
+}
+
+/* Make the cards pop off the dark background */
+.card {
+    background-color: #ffffff;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+}
+
+/* Ensure text inside cards remains dark */
+.card-body, .card-footer, .table {
+    color: #333333;
+}
+
+/* Update Page Titles */
+h1, h2, h3, h4, h5 {
+    color: #ffffff; /* White headers on the dark background */
+}
+
+/* Fix headers inside the white cards */
+.card-body h1, .card-body h2, .card-body h3, .card-body h4, .card-body h5 {
+    color: #1e3c72; /* Brand Navy inside white cards */
+}
+
+/* Adjust forms to look clean on the dark background */
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    background-color: #fcfcfc;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 0.25rem rgba(30, 60, 114, 0.25);
+    }
+
+/* Alerts (Success/Error messages) */
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-color: #badbcc;
+}
+
+.alert-info {
+    background-color: #cff4fc;
+    color: #055160;
+    border-color: #b6effb;
 }

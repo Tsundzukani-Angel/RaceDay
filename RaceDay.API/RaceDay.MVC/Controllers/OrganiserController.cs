@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RaceDay.MVC.Models;
 using RaceDay.MVC.Services;
+using System.Text.Json;
 
 namespace RaceDay.MVC.Controllers;
 
@@ -38,7 +39,29 @@ public class OrganiserController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        // Map the ViewModel to the API DTO
+        // 1. If an image was uploaded, send it to the API first
+        if (model.BannerFile != null && model.BannerFile.Length > 0)
+        {
+            var fileContent = new MultipartFormDataContent();
+            var fileStream = model.BannerFile.OpenReadStream();
+            fileContent.Add(new StreamContent(fileStream), "file", model.BannerFile.FileName);
+
+            var uploadResponse = await _api.PostFileAsync("api/events/upload-banner", fileContent);
+
+            if (uploadResponse.IsSuccessStatusCode)
+            {
+                var json = await uploadResponse.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                model.BannerUrl = doc.RootElement.GetProperty("bannerUrl").GetString();
+            }
+            else
+            {
+                ModelState.AddModelError("", "Failed to upload banner image.");
+                return View(model);
+            }
+        }
+
+        // 2. Map the ViewModel to the API DTO
         var eventDto = new EventDto
         {
             Name = model.Name,
@@ -49,7 +72,8 @@ public class OrganiserController : Controller
             EventType = model.EventType,
             MaxParticipants = model.MaxParticipants,
             RegistrationDeadline = model.RegistrationDeadline,
-            Status = "Open"
+            Status = "Open",
+            BannerUrl = model.BannerUrl // Include the new URL
         };
 
         var response = await _api.PostAsync("api/events", eventDto);
@@ -61,7 +85,7 @@ public class OrganiserController : Controller
 
         var errorJson = await response.Content.ReadAsStringAsync();
         ModelState.AddModelError("", $"API Error: {errorJson}");
-       
+
         return View(model);
     }
 
@@ -155,5 +179,95 @@ public class OrganiserController : Controller
         }
 
         return RedirectToAction(nameof(Enrolments), new { eventId = eventId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        var ev = await _api.GetAsync<EventDto>($"api/events/{id}");
+        if (ev == null) return NotFound();
+
+        // Map the DTO back to the ViewModel
+        var model = new EventViewModel
+        {
+            EventID = ev.EventID,
+            Name = ev.Name,
+            Description = ev.Description,
+            EventDate = ev.EventDate,
+            Location = ev.Location,
+            Distance = ev.Distance,
+            EventType = ev.EventType,
+            MaxParticipants = ev.MaxParticipants,
+            RegistrationDeadline = ev.RegistrationDeadline,
+            BannerUrl = ev.BannerUrl
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(EventViewModel model)
+    {
+        if (HttpContext.Session.GetString("Role") != "Organiser")
+            return RedirectToAction("Index", "Home");
+
+        if (!ModelState.IsValid) return View(model);
+
+        if (model.BannerFile != null && model.BannerFile.Length > 0)
+        {
+            var fileContent = new MultipartFormDataContent();
+            var fileStream = model.BannerFile.OpenReadStream();
+            fileContent.Add(new StreamContent(fileStream), "file", model.BannerFile.FileName);
+
+            var uploadResponse = await _api.PostFileAsync("api/events/upload-banner", fileContent);
+
+            if (uploadResponse.IsSuccessStatusCode)
+            {
+                var json = await uploadResponse.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                model.BannerUrl = doc.RootElement.GetProperty("bannerUrl").GetString();
+            }
+            else
+            {
+                var uploadError = await uploadResponse.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Banner Upload Failed ({uploadResponse.StatusCode}): {uploadError}");
+                return View(model); // STOP and show the error
+            }
+        }
+
+        var eventDto = new EventDto
+        {
+            EventID = model.EventID,
+            Name = model.Name,
+            Description = model.Description,
+            EventDate = model.EventDate,
+            Location = model.Location,
+            Distance = model.Distance,
+            EventType = model.EventType,
+            MaxParticipants = model.MaxParticipants,
+            RegistrationDeadline = model.RegistrationDeadline,
+            Status = "Open",
+            BannerUrl = model.BannerUrl
+        };
+
+        // Debugging: Print to console
+        Console.WriteLine($"SENDING PUT to api/events/{model.EventID}");
+
+        var response = await _api.PutAsync($"api/events/{model.EventID}", eventDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return RedirectToAction(nameof(Dashboard));
+        }
+
+        // Debugging: Show the exact error
+        var errorJson = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"API ERROR: {response.StatusCode} - {errorJson}");
+
+        ModelState.AddModelError("", $"API Error ({response.StatusCode}): {errorJson}");
+        return View(model);
     }
 }
