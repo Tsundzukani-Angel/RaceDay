@@ -329,4 +329,100 @@ To view the commit history, run:
 git log --oneline
 ```
 YouTube link: https://youtu.be/AzXOq9GHdYo
-## Part 3
+
+# Part 3 — RaceDay MVC Web Application & Docker
+
+## Overview
+
+Part 3 completes the RaceDay platform by introducing a user-friendly frontend built with ASP.NET Core MVC. The MVC application communicates with the RESTful API developed in Part 2 to provide an interactive platform for event organisers and participants.
+
+The application provides role-based navigation, event management, participant enrolments, and a responsive user interface. It also integrates Azure Blob Storage for event banner image uploads.
+
+To support deployment and consistent development environments, the application is containerised using Docker Compose. This allows the database, API, and MVC frontend to run together in separate containers.
+
+## Features
+
+### 1. Role-Based User Interface
+RaceDay provides different interfaces depending on the authenticated user's role.
+
+**Organiser Dashboard**
+- View and manage events.
+- Create new events.
+- Update and delete existing events.
+- Manage event categories.
+- View participant enrolments.
+- Manage race results.
+- Upload event banner images.
+
+**Participant Interface**
+- Browse available events.
+- View event information and banners.
+- Explore event categories.
+- Enrol in available events.
+- View personal enrolments and race history.
+- Manage personal profile information.
+
+### 2. Professional User Interface
+The MVC application provides a responsive interface designed to make event management straightforward.
+
+The interface includes:
+- A modern dark-theme design with brand colours.
+- Consistent styling across application pages.
+- Responsive layouts using Bootstrap.
+- Role-based navigation.
+- Organiser and participant dashboards.
+- Event cards and event detail pages.
+- User-friendly forms for managing events and profiles.
+
+### 3. Azure Blob Storage Integration
+RaceDay integrates Azure Blob Storage to support event banner image uploads.
+
+Organisers can upload banner images for their events, allowing participants to view event-related visuals when browsing the platform. The API handles the image upload functionality and integrates with Azure Blob Storage.
+
+### 4. Docker Containerisation
+The RaceDay application uses Docker Compose to run its main components in separate containers.
+
+The containerised environment includes:
+- SQL Server database.
+- ASP.NET Core Web API.
+- ASP.NET Core MVC frontend.
+
+Docker Compose manages the services and allows the application components to communicate within the container environment.
+
+## Technologies Used
+
+| Component | Technology |
+|---|---|
+| Frontend | ASP.NET Core MVC |
+| Backend | ASP.NET Core Web API |
+| Programming Language | C# |
+| Database | SQL Server |
+| ORM | Entity Framework Core |
+| Styling | Bootstrap, HTML, CSS |
+| Cloud Storage | Azure Blob Storage |
+| Containerisation | Docker |
+| Container Orchestration | Docker Compose |
+| API Documentation | Swagger / OpenAPI |
+| Version Control | Git and GitHub |
+
+## Running RaceDay with Docker
+
+### Prerequisites
+Before running the application, ensure that you have:
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed.
+- Docker Desktop running on your computer.
+- Git installed to clone the repository.
+
+### 1. Clone the Repository
+Open a terminal and run:
+```bash
+git clone https://github.com/Tsundzukan-i-Angel/RaceDay.git
+```
+
+### CI Build Status
+<img width="598" height="93" alt="Screenshot 2026-11-09 120440" src="https://github.com/user-attachments/assets/3e5d1a32-a170-4c72-b0dd-099760071c68" />
+<img width="673" height="640" alt="Screenshot 2026-11-09 120302" src="https://github.com/user-attachments/assets/1c2bd97c-1534-48c4-8b49-ddd77cfe87ac" />
+
+YouTube Link: https://youtu.be/h4wl6yZGefE
+
+AUTHOR: TSUNDZUKANI ANGEL STOLTZ
