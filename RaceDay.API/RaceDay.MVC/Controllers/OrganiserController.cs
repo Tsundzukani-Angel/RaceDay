@@ -13,6 +13,7 @@ public class OrganiserController : Controller
 
     public async Task<IActionResult> Dashboard()
     {
+
         // Checks if user is Organiser
         if (HttpContext.Session.GetString("Role") != "Organiser")
             return RedirectToAction("Index", "Home");
@@ -53,14 +54,16 @@ public class OrganiserController : Controller
                 var json = await uploadResponse.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(json);
                 model.BannerUrl = doc.RootElement.GetProperty("bannerUrl").GetString();
+               
             }
             else
             {
-                ModelState.AddModelError("", "Failed to upload banner image.");
+                var uploadError = await uploadResponse.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Banner Upload Failed ({uploadResponse.StatusCode}): {uploadError}");
                 return View(model);
             }
         }
-
+        
         // 2. Map the ViewModel to the API DTO
         var eventDto = new EventDto
         {
@@ -237,7 +240,7 @@ public class OrganiserController : Controller
                 return View(model); // STOP and show the error
             }
         }
-
+       
         var eventDto = new EventDto
         {
             EventID = model.EventID,
@@ -254,7 +257,7 @@ public class OrganiserController : Controller
         };
 
         // Debugging: Print to console
-        Console.WriteLine($"SENDING PUT to api/events/{model.EventID}");
+       // Console.WriteLine($"SENDING PUT to api/events/{model.EventID}");
 
         var response = await _api.PutAsync($"api/events/{model.EventID}", eventDto);
 

@@ -15,6 +15,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__RaceDayConnection=Server=db;Database=RaceDayDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+      - AzureStorage__ConnectionString=${AZURE_CONNECTION_STRING}
     ports:
       - "7112:8080"
     depends_on:

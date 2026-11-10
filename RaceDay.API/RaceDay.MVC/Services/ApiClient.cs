@@ -66,7 +66,6 @@ public class ApiClient
         var request = CreateRequest(HttpMethod.Post, endpoint, content);
         var response = await _httpClient.SendAsync(request);
 
-        // Capture the new session cookie from the API (on login)
         if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
         {
             foreach (var cookie in cookies)

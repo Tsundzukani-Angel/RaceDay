@@ -27,4 +27,6 @@ public class EventDto
     public DateTime? RegistrationDeadline { get; set; }
 
     public string? Status { get; set; } // "Open", "Closed" & "Completed"
+
+    public string? BannerUrl { get; set; }
 }
